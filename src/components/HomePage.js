@@ -84,7 +84,7 @@ const HomePage = () => {
       <div className="mt-6 w-full max-w-md p-4 bg-white shadow-lg rounded-lg space-y-4 h-[90vh]">
         {/* Submitted Reviews Section with Scroll */}
         <div className="space-y-4 h-[65vh] overflow-y-auto bg-gray-50 rounded-lg p-4">
-          <h4 className="text-lg font-semibold text-indigo-700">Submitted Reviews:</h4>
+          <h4 className="text-lg font-semibold text-indigo-700">SMC_GK_GS_CHAT:</h4>
           {reviews.map((review, index) => (
             <div
               key={index}
