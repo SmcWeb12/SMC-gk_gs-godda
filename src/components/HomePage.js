@@ -1,133 +1,123 @@
 // src/components/Home/HomePage.js
 
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaPaperPlane } from "react-icons/fa"; // For Send icon
 
 const HomePage = () => {
-  const [review, setReview] = useState("");
+  const [message, setMessage] = useState("");
   const [name, setName] = useState("");
-  const [reviews, setReviews] = useState([]); // Store all submitted reviews
+  const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch saved reviews from localStorage when component mounts
+  // Fetch saved messages from localStorage
   useEffect(() => {
-    const savedReviews = JSON.parse(localStorage.getItem("reviews")) || [];
-    setReviews(savedReviews);
+    const savedMessages = JSON.parse(localStorage.getItem("messages")) || [];
+    const filteredMessages = savedMessages.filter(
+      (msg) => new Date() - new Date(msg.timestamp) <= 24 * 60 * 60 * 1000
+    );
+    setMessages(filteredMessages);
+    localStorage.setItem("messages", JSON.stringify(filteredMessages));
 
     const timer = setInterval(() => {
-      const newReviews = savedReviews.filter((review) => {
-        return new Date() - new Date(review.timestamp) <= 5 * 60 * 1000;
-      });
-
-      setReviews(newReviews);
-      localStorage.setItem("reviews", JSON.stringify(newReviews));
+      const updatedMessages = filteredMessages.filter(
+        (msg) => new Date() - new Date(msg.timestamp) <= 24 * 60 * 60 * 1000
+      );
+      setMessages(updatedMessages);
+      localStorage.setItem("messages", JSON.stringify(updatedMessages));
     }, 60000);
 
-    return () => clearInterval(timer); // Cleanup interval on unmount
+    return () => clearInterval(timer);
   }, []);
 
-  const handleReviewChange = (e) => {
-    setReview(e.target.value);
-  };
+  const handleMessageChange = (e) => setMessage(e.target.value);
+  const handleNameChange = (e) => setName(e.target.value);
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleSubmitReview = () => {
-    if (name && review) {
-      const newReview = {
-        name,
-        text: review,
-        isUser: true,
-        timestamp: new Date(),
-      };
-
-      const updatedReviews = [...reviews, newReview];
-      setReviews(updatedReviews);
-      localStorage.setItem("reviews", JSON.stringify(updatedReviews));
-      setReview("");
+  const handleSubmitMessage = () => {
+    if (name && message) {
+      const newMessage = { name, text: message, isUser: true, timestamp: new Date() };
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
+      localStorage.setItem("messages", JSON.stringify(updatedMessages));
+      setMessage("");
     } else {
-      alert("Please provide your name and review.");
+      alert("Please provide your name and message.");
     }
   };
 
-  const handleQuizStart = () => {
-    navigate("/quiz");
-  };
+  const handleQuizStart = () => navigate("/quiz");
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-r from-blue-500 to-indigo-600">
-      <h1 className="text-4xl font-bold text-white mb-4">Welcome to the Math Quiz</h1>
-      <p className="mb-6 text-lg text-center text-white">
-        Test your math skills! Join our quiz challenge and compete with others.
-      </p>
-      <ul className="list-disc text-white mb-6 pl-5">
-        <li>1-minute timer for each question</li>
-        <li>Questions for classes 11th and 12th</li>
-        <li>Instant feedback on correct/incorrect answers</li>
-      </ul>
-      <div className="flex space-x-4 mb-6">
+    <div className="min-h-screen bg-gradient-to-r from-indigo-900 via-purple-800 to-blue-900 flex flex-col items-center py-10 px-4">
+      {/* Header Section */}
+      <div className="text-center text-white mb-12">
+        <h1 className="text-3xl sm:text-6xl font-extrabold leading-tight mb-2 tracking-wide">SMC GK GS Godda</h1>
+        <h2 className="text-lg sm:text-2xl font-light mb-4 italic">powered by Mukesh Sir</h2>
+        <p className="text-sm sm:text-lg max-w-md mx-auto mb-6">Challenge your skills daily with quizzes crafted for 11th and 12th graders!</p>
+      </div>
+
+      {/* Quiz Features and Start Button */}
+      <div className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-3xl p-8 max-w-xl w-full mb-10 transition duration-500 hover:scale-105 transform">
+        <div className="space-y-3 text-gray-700">
+          <p className="text-lg sm:text-xl font-semibold mb-4">💡 Quiz Features:</p>
+          <ul className="text-gray-600 space-y-2">
+            <li>⏱️ Timed 1-minute question sessions</li>
+            <li>📘 Curated questions for classes 11 & 12</li>
+            <li>✅ Instant feedback on your answers</li>
+          </ul>
+        </div>
         <button
           onClick={handleQuizStart}
-          className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-700"
+          className="mt-6 w-full py-3 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold text-lg sm:text-xl rounded-full shadow-md transform transition-all duration-300 hover:scale-105"
         >
           Start Quiz
         </button>
-        <Link to="/admin-dashboard">
-         
-        </Link>
       </div>
 
-      {/* Review Section */}
-      <div className="mt-6 w-full max-w-md p-4 bg-white shadow-lg rounded-lg space-y-4 h-[90vh]">
-        {/* Submitted Reviews Section with Scroll */}
-        <div className="space-y-4 h-[65vh] overflow-y-auto bg-gray-50 rounded-lg p-4">
-          <h4 className="text-lg font-semibold text-indigo-700">SMC_GK_GS_CHAT:</h4>
-          {reviews.map((review, index) => (
-            <div
-              key={index}
-              className={`flex ${review.isUser ? "justify-end" : "justify-start"} space-x-3`}
-            >
-              <div
-                className={`p-3 rounded-2xl max-w-xs break-words shadow-md ${
-                  review.isUser
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-300 text-gray-800"
-                }`}
-              >
-                <p className="font-semibold">{review.name}</p>
-                <p>{review.text}</p>
+      {/* Community Chat Section */}
+      <div className="w-full max-w-2xl bg-white shadow-lg rounded-3xl p-6 space-y-6">
+        <div className="text-indigo-800 font-semibold text-2xl mb-2">Community Chat</div>
+
+        {/* Display Messages */}
+        <div className="h-72 overflow-y-auto bg-gray-100 p-4 rounded-xl shadow-inner space-y-4">
+          {messages.length > 0 ? (
+            messages.map((msg, index) => (
+              <div key={index} className={`flex ${msg.isUser ? "justify-end" : "justify-start"} space-x-3`}>
+                <div
+                  className={`p-4 max-w-sm rounded-xl shadow-md ${msg.isUser ? "bg-indigo-500 text-white" : "bg-gray-300 text-gray-800"}`}
+                >
+                  <p className="font-semibold">{msg.name}</p>
+                  <p>{msg.text}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-gray-500">No messages yet.</p>
+          )}
         </div>
 
-        {/* Leave a Review Section */}
-        <div className="w-full bg-gray-100 p-3 rounded-lg">
-          <div className="mb-3">
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={handleNameChange}
-              className="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center space-x-3">
+        {/* Send Message */}
+        <div className="bg-gray-100 p-5 rounded-xl shadow-lg">
+          <input
+            type="text"
+            placeholder="Your name"
+            value={name}
+            onChange={handleNameChange}
+            className="w-full mb-3 p-3 rounded-xl border border-gray-300 shadow-inner focus:ring-2 focus:ring-indigo-500"
+          />
+          <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-3">
             <textarea
-              placeholder="Type your message..."
-              value={review}
-              onChange={handleReviewChange}
-              className="w-full p-2 border-none rounded-lg resize-none"
+              placeholder="Type your message here..."
+              value={message}
+              onChange={handleMessageChange}
+              className="w-full p-3 rounded-lg border-none resize-none shadow-inner focus:ring-2 focus:ring-indigo-500"
               rows="2"
             />
             <button
-              onClick={handleSubmitReview}
-              className="bg-green-500 text-white rounded-full p-2 hover:bg-green-700"
+              onClick={handleSubmitMessage}
+              className="bg-green-500 text-white rounded-full p-4 shadow-lg hover:bg-green-600 transition-all"
             >
-              <FaPaperPlane />
+              <FaPaperPlane className="text-xl" />
             </button>
           </div>
         </div>
